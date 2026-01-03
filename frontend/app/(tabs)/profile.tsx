@@ -40,29 +40,41 @@ export default function ProfileScreen() {
 
   const menuItems = [
     {
-      icon: 'person-outline' as const,
-      label: 'Edit Profile',
-      onPress: () => {},
+      icon: 'diamond-outline' as const,
+      label: 'Upgrade to Premium',
+      subtitle: 'Unlock all features',
+      color: COLORS.gold,
+      onPress: () => router.push('/subscription'),
     },
     {
       icon: 'analytics-outline' as const,
       label: 'Retake Quiz',
+      subtitle: 'Discover your archetype again',
       onPress: () => router.push('/quiz'),
-    },
-    {
-      icon: 'notifications-outline' as const,
-      label: 'Notifications',
-      onPress: () => {},
     },
     {
       icon: 'help-circle-outline' as const,
       label: 'Help & Support',
-      onPress: () => {},
+      subtitle: 'FAQ and contact us',
+      onPress: () => router.push('/help'),
     },
     {
       icon: 'shield-checkmark-outline' as const,
       label: 'Privacy Policy',
-      onPress: () => {},
+      subtitle: 'How we protect your data',
+      onPress: () => router.push('/privacy'),
+    },
+    {
+      icon: 'document-text-outline' as const,
+      label: 'Terms of Service',
+      subtitle: 'Our terms and conditions',
+      onPress: () => Alert.alert('Terms of Service', 'Terms of Service coming soon.'),
+    },
+    {
+      icon: 'star-outline' as const,
+      label: 'Rate the App',
+      subtitle: 'Love Rizz Academy? Rate us!',
+      onPress: () => Alert.alert('Rate Us', 'Thank you for your support! Rating feature coming soon.'),
     },
   ];
 
@@ -93,7 +105,31 @@ export default function ProfileScreen() {
           </View>
           <Text style={styles.userName}>{user?.name || 'User'}</Text>
           <Text style={styles.userEmail}>{user?.email || ''}</Text>
+          
+          {/* Free Plan Badge */}
+          <View style={styles.planBadge}>
+            <Ionicons name="star" size={14} color={COLORS.gold} />
+            <Text style={styles.planText}>Free Plan</Text>
+          </View>
         </Card>
+
+        {/* Upgrade Banner */}
+        <TouchableOpacity 
+          style={styles.upgradeBanner}
+          onPress={() => router.push('/subscription')}
+          activeOpacity={0.9}
+        >
+          <View style={styles.upgradeContent}>
+            <Ionicons name="rocket" size={28} color={COLORS.gold} />
+            <View style={styles.upgradeText}>
+              <Text style={styles.upgradeTitle}>Unlock Premium</Text>
+              <Text style={styles.upgradeSubtitle}>
+                Unlimited AI chats, all features & more
+              </Text>
+            </View>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color={COLORS.gold} />
+        </TouchableOpacity>
 
         {/* Menu Items */}
         <View style={styles.menuSection}>
@@ -105,10 +141,27 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuItemLeft}>
-                <View style={styles.menuIconContainer}>
-                  <Ionicons name={item.icon} size={22} color={COLORS.gold} />
+                <View style={[
+                  styles.menuIconContainer,
+                  item.color && { backgroundColor: `${item.color}20` }
+                ]}>
+                  <Ionicons 
+                    name={item.icon} 
+                    size={22} 
+                    color={item.color || COLORS.gold} 
+                  />
                 </View>
-                <Text style={styles.menuItemLabel}>{item.label}</Text>
+                <View>
+                  <Text style={[
+                    styles.menuItemLabel,
+                    item.color && { color: item.color }
+                  ]}>
+                    {item.label}
+                  </Text>
+                  {item.subtitle && (
+                    <Text style={styles.menuItemSubtitle}>{item.subtitle}</Text>
+                  )}
+                </View>
               </View>
               <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -129,6 +182,7 @@ export default function ProfileScreen() {
 
         {/* App Version */}
         <Text style={styles.versionText}>Rizz Academy v1.0.0</Text>
+        <Text style={styles.copyrightText}>Made with love in India</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -154,7 +208,7 @@ const styles = StyleSheet.create({
   userCard: {
     alignItems: 'center',
     paddingVertical: SPACING.xl,
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   avatarContainer: {
     marginBottom: SPACING.md,
@@ -185,6 +239,50 @@ const styles = StyleSheet.create({
   userEmail: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textSecondary,
+    marginBottom: SPACING.md,
+  },
+  planBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${COLORS.gold}20`,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: BORDER_RADIUS.full,
+    gap: SPACING.xs,
+  },
+  planText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '600',
+    color: COLORS.gold,
+  },
+  upgradeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.xl,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+  },
+  upgradeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  upgradeText: {
+    flex: 1,
+  },
+  upgradeTitle: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '700',
+    color: COLORS.gold,
+  },
+  upgradeSubtitle: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
+    marginTop: 2,
   },
   menuSection: {
     marginBottom: SPACING.xl,
@@ -204,8 +302,8 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   menuIconContainer: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     borderRadius: BORDER_RADIUS.md,
     backgroundColor: `${COLORS.gold}15`,
     alignItems: 'center',
@@ -216,13 +314,24 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontWeight: '500',
   },
+  menuItemSubtitle: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
   logoutSection: {
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   logoutButton: {
     width: '100%',
   },
   versionText: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  copyrightText: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.textMuted,
     textAlign: 'center',
