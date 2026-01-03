@@ -13,7 +13,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../../src/components/Button';
 import { ProgressBar } from '../../src/components/ProgressBar';
-import { Card } from '../../src/components/Card';
 import { api } from '../../src/hooks/useApi';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../src/constants/theme';
@@ -40,8 +39,9 @@ export default function QuizScreen() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
-  const progress = useSharedValue(0);
+  
+  // Simple fade animation
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -50,12 +50,6 @@ export default function QuizScreen() {
     }
     fetchQuestions();
   }, [isAuthenticated, authLoading]);
-
-  useEffect(() => {
-    progress.value = withTiming(((currentIndex + 1) / questions.length) * 100, {
-      duration: 300,
-    });
-  }, [currentIndex, questions.length]);
 
   const fetchQuestions = async () => {
     try {
@@ -66,6 +60,23 @@ export default function QuizScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const animateTransition = (callback: () => void) => {
+    Animated.sequence([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    
+    setTimeout(callback, 150);
   };
 
   const handleOptionSelect = (value: string) => {
@@ -80,10 +91,12 @@ export default function QuizScreen() {
       { question_id: questions[currentIndex].id, answer: selectedOption },
     ];
     setAnswers(newAnswers);
-    setSelectedOption(null);
 
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      animateTransition(() => {
+        setSelectedOption(null);
+        setCurrentIndex(currentIndex + 1);
+      });
     } else {
       // Submit quiz
       setSubmitting(true);
@@ -102,10 +115,12 @@ export default function QuizScreen() {
 
   const handleBack = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      const previousAnswer = answers[currentIndex - 1];
-      setSelectedOption(previousAnswer?.answer || null);
-      setAnswers(answers.slice(0, -1));
+      animateTransition(() => {
+        setCurrentIndex(currentIndex - 1);
+        const previousAnswer = answers[currentIndex - 1];
+        setSelectedOption(previousAnswer?.answer || null);
+        setAnswers(answers.slice(0, -1));
+      });
     }
   };
 
@@ -158,17 +173,12 @@ export default function QuizScreen() {
       </View>
 
       {/* Question */}
-      <Animated.View
-        key={currentIndex}
-        entering={FadeInRight.duration(300)}
-        exiting={FadeOutLeft.duration(200)}
-        style={styles.questionContainer}
-      >
+      <Animated.View style={[styles.questionContainer, { opacity: fadeAnim }]}>
         <Text style={styles.questionText}>{currentQuestion?.question}</Text>
 
         {/* Options */}
         <View style={styles.optionsContainer}>
-          {currentQuestion?.options.map((option, index) => (
+          {currentQuestion?.options.map((option) => (
             <TouchableOpacity
               key={option.value}
               style={[
