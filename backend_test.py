@@ -300,11 +300,22 @@ def test_unauthenticated_access():
     
     for method, endpoint in protected_endpoints:
         print_info(f"Testing {method} {endpoint} without auth")
-        response = make_request(method, endpoint, expected_status=401)
-        if response is None:  # This means we got the expected 401
-            print_success(f"{endpoint} properly protected")
-        else:
-            print_error(f"{endpoint} should require authentication")
+        
+        # Make request without auth headers, expecting 401
+        url = f"{BASE_URL}{endpoint}"
+        try:
+            if method.upper() == "GET":
+                response = requests.get(url, timeout=30)
+            elif method.upper() == "POST":
+                response = requests.post(url, json={}, timeout=30)
+            
+            if response.status_code == 401:
+                print_success(f"{endpoint} properly protected")
+            else:
+                print_error(f"{endpoint} should return 401, got {response.status_code}")
+                
+        except requests.exceptions.RequestException as e:
+            print_error(f"Request failed: {e}")
 
 def main():
     """Run all tests"""
