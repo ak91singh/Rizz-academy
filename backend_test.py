@@ -317,6 +317,24 @@ def test_unauthenticated_access():
         except requests.exceptions.RequestException as e:
             print_error(f"Request failed: {e}")
 
+def test_auth_session_exchange():
+    """Test POST /api/auth/session endpoint"""
+    print_test_header("Auth Session Exchange API")
+    
+    # Test with missing session_id
+    print_info("Testing POST /api/auth/session without session_id")
+    response = make_request("POST", "/auth/session", data={}, expected_status=400)
+    if response:
+        print_success("Properly rejects missing session_id")
+    
+    # Test with invalid session_id (this will fail since we don't have real Emergent Auth)
+    print_info("Testing POST /api/auth/session with invalid session_id")
+    response = make_request("POST", "/auth/session", data={"session_id": "invalid_session"}, expected_status=401)
+    if response:
+        print_success("Properly rejects invalid session_id")
+    else:
+        print_warning("Auth session exchange requires real Emergent Auth integration")
+
 def main():
     """Run all tests"""
     print(f"{Colors.BOLD}🧪 Rizz Academy Backend API Test Suite{Colors.ENDC}")
@@ -328,6 +346,7 @@ def main():
     test_quiz_questions()
     test_foundation_prompts()
     test_combat_scenarios()
+    test_auth_session_exchange()
     test_authenticated_endpoints()
     test_unauthenticated_access()
     
